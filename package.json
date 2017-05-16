@@ -1,0 +1,14 @@
+{
+  "name": "k9bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/aengl/k9bot.git",
+  "author": "Andreas Smeria <ae@cephea.de>",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.6.6",
+    "dotenv": "^4.0.0",
+    "request-promise-native": "^1.0.4",
+    "slackbots": "^1.0.2"
+  }
+}
