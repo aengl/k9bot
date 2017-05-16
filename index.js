@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const debug = require('debug')('index');
+const he = require('he');
 const request = require('request-promise-native');
 const SlackBot = require('slackbots');
 
@@ -39,7 +40,7 @@ function postAnswer(data, channel) {
   debug('posting answer:', data);
   bot.postMessage(
     channel,
-    data.score > 0 ? data.answer : ':panda_face:',
+    data.score > 0 ? he.decode(data.answer) : ':panda_face:',
     messageOptions
   );
 }
