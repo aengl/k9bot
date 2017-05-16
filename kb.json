@@ -2,8 +2,16 @@
   "name": "K9",
   "qnaPairs": [
     {
+      "question": "Hi!",
+      "answer": "Woof! :heart:"
+    },
+    {
+      "question": "Good dog!",
+      "answer": "Woof woof! :dog:"
+    },
+    {
       "question": "How do I join Trello?",
-      "answer": "Go to this link to join the K9 Trello board: https://trello.com/invite/b/OpNUyITP/ea0a8e0f41eac71db88bfc26c69ee18e/k9 It will ask you to sign up for Trello or sign in if you already have an account."
+      "answer": "Go to this link to join the Trello board: https://trello.com/invite/b/OpNUyITP/ea0a8e0f41eac71db88bfc26c69ee18e/k9 It will ask you to sign up for Trello or sign in if you already have an account."
     },
     {
       "question": "How do I use Trello?",
@@ -11,7 +19,7 @@
     },
     {
       "question": "What are the kitchen rules?",
-      "answer": "Both night guests and residents may cook in the kitchen. Make sure the kitchen looks super nice and clean when you leave it (all surfaces).:angel: Everything should be washed and cleaned immediately after meal is over. Dishwasher should be switched on when full. If dishwasher is running and you have dirty dishes, you wash it by hand (or put a note with your name on the dirty dishes). Dry wet dish by hand and put it back into its place. Tagged food is taken. Untagged food is free game. Anyone can throw out tagged and untagged old food."
+      "answer": "Both night guests and residents may cook in the kitchen. Make sure the kitchen looks super nice and clean when you leave it (all surfaces). :angel: Everything should be washed and cleaned immediately after meal is over. Dishwasher should be switched on when full. If dishwasher is running and you have dirty dishes, you wash it by hand (or put a note with your name on the dirty dishes). Dry wet dish by hand and put it back into its place. Tagged food is taken. Untagged food is free game. Anyone can throw out tagged and untagged old food."
     },
     {
       "question": "How does the laundry room work?",
