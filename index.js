@@ -67,6 +67,7 @@ const getTextWithoutMention = message =>
 bot.on('start', () => {
   botUser = bot.users.find(user => user.name === botName);
   debug('found myself on Slack:', botUser.id);
+  console.log(`Bot "${botName}" is listening for messages..`);
 });
 
 /**
