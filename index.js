@@ -16,17 +16,27 @@ const messageOptions = {
   as_user: true,
 };
 
-const qnaUrl = `https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/${process.env.KNOWLEDGEBASE_ID}/generateAnswer`;
+const url = `https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/${process.env.KNOWLEDGEBASE_ID}/`;
 
-const qnaHeaders = {
+const headers = {
   'Ocp-Apim-Subscription-Key': process.env.QNA_KEY,
 };
 
+/**
+ * Queries the knowledge base for a question and returns the answer as an
+ * object.
+ *
+ * @param {Object} question The question to query the KB with.
+ */
 function getAnswer(question) {
   debug('got question:', question);
   return new Promise((resolve, reject) => {
     request
-      .post({ url: qnaUrl, headers: qnaHeaders, form: { question } })
+      .post({
+        url: url + 'generateAnswer',
+        headers,
+        form: { question },
+      })
       .then(res => {
         const data = JSON.parse(res);
         debug('got answers:', data);
@@ -36,13 +46,75 @@ function getAnswer(question) {
   });
 }
 
+/**
+ * Posts an answer to a channel.
+ *
+ * @param {Object} data Data returned by `getAnswer()`.
+ * @param {string} channel A Slack channel ID.
+ */
 function postAnswer(data, channel) {
   debug('posting answer:', data);
   bot.postMessage(
     channel,
-    data.score > 0 ? he.decode(data.answer) : ':panda_face:',
+    data.score > 0 ? he.decode(data.answer) : 'Woof? :dog:',
     messageOptions
   );
+}
+
+/**
+ * Adds a QnA pair to the knowledge base.
+ *
+ * @param {string} question The question to add.
+ * @param {string} answer The answer to the question.
+ * @param {string} channel The channel to post an acknowledgement to.
+ */
+function addAnswer(question, answer, channel) {
+  debug('adding new question/answer:', question, answer);
+  const body = JSON.stringify({
+    add: {
+      qnaPairs: [
+        {
+          answer: answer,
+          question: question,
+        },
+      ],
+    },
+  });
+  return new Promise((resolve, reject) => {
+    request
+      .patch({ url, headers, body })
+      .then(() => {
+        bot.postMessage(channel, 'Got it! :dog:', messageOptions);
+        publish().then(resolve);
+      })
+      .catch(debug);
+  });
+}
+
+/**
+ * Given a message on Slack, executes the appropriate response.
+ *
+ * @param {string} messageText Message that was sent to the bot, without
+ *  the mentions (@botname).
+ * @param {string} channel The channel to respond to.
+ */
+function processMessage(messageText, channel) {
+  const answerIndex = messageText.indexOf('A:');
+  if (answerIndex > 0 && messageText.indexOf('Q:') === 0) {
+    const question = messageText.substring(2, answerIndex).trim();
+    const answer = messageText.substring(answerIndex + 2).trim();
+    addAnswer(question, answer, channel);
+  } else {
+    getAnswer(messageText).then(data => postAnswer(data, channel));
+  }
+}
+
+/**
+ * Publishes the knowledge base. Necessary to make any changes live.
+ */
+function publish() {
+  debug('publishing knowledge base');
+  return request.put({ url, headers });
 }
 
 function isChatMessage(message) {
@@ -74,12 +146,10 @@ bot.on('message', message => {
   if (isChatMessage(message) && !isFromMe(message)) {
     if (isDirectMessage(message)) {
       debug('I got a direct message:', message);
-      getAnswer(message.text).then(data => postAnswer(data, message.channel));
+      processMessage(message.text, message.channel);
     } else if (mentionsMe(message)) {
       debug('I was mentioned in this message:', message);
-      getAnswer(getTextWithoutMention(message)).then(data =>
-        postAnswer(data, message.channel)
-      );
+      processMessage(getTextWithoutMention(message), message.channel);
     }
   }
 });
