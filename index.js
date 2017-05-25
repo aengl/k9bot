@@ -10,7 +10,7 @@ const bot = new SlackBot({
   token: process.env.BOT_TOKEN,
   name: botName,
 });
-let botUser = undefined;
+let botUser = null;
 
 const messageOptions = {
   as_user: true,
@@ -83,3 +83,13 @@ bot.on('message', message => {
     }
   }
 });
+
+/**
+ * Error handler.
+ */
+const reconnect = (...args) => {
+  debug('lost connection', ...args);
+  setTimeout(() => bot.connect(), 1000);
+};
+bot.on('close', reconnect);
+bot.on('error', reconnect);
