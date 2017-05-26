@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const debug = require('debug')('index');
+const net = require('net');
 const he = require('he');
 const SlackBot = require('slackbots');
 const qna = require('./qna');
@@ -94,3 +95,9 @@ const reconnect = (...args) => {
 };
 bot.on('close', reconnect);
 bot.on('error', reconnect);
+
+/**
+ * Bind to a port. We don't really need one, but if we don't Heroku will kill
+ * the process.
+ */
+net.createServer().listen(process.env.PORT || 9999);
