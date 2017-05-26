@@ -9,10 +9,11 @@
     "debug": "^2.6.6",
     "dotenv": "^4.0.0",
     "he": "^1.1.1",
+    "pm2": "^2.4.6",
     "request-promise-native": "^1.0.4",
     "slackbots": "^1.0.2"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "pm2 start index.js"
   }
 }
