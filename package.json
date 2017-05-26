@@ -14,6 +14,6 @@
     "slackbots": "^1.0.2"
   },
   "scripts": {
-    "start": "pm2 start index.js"
+    "start": "pm2 start --attach index.js --env development"
   }
 }
