@@ -12,6 +12,7 @@ const headers = {
  * object.
  *
  * @param {Object} question The question to query the KB with.
+ * @returns {Promise} A promise of an answer object.
  */
 function getAnswer(question) {
   debug('got question:', question);
@@ -37,6 +38,7 @@ function getAnswer(question) {
  * @param {string} question The question to add.
  * @param {string} answer The answer to the question.
  * @param {string} channel The channel to post an acknowledgement to.
+ * @returns {Promise} A promise.
  */
 function addAnswer(question, answer, channel) {
   debug('adding new question/answer:', question, answer);
@@ -62,6 +64,7 @@ function addAnswer(question, answer, channel) {
 
 /**
  * Publishes the knowledge base. Necessary to make any changes live.
+ * @returns {Promise} A promise.
  */
 function publish() {
   debug('publishing knowledge base');
