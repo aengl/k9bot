@@ -54,6 +54,7 @@ function postAnswer(data, channel) {
 
 const isChatMessage = message =>
   message.type === 'message' && Boolean(message.text);
+const isBotMessage = message => message.subtype === 'bot_message';
 const isDirectMessage = message =>
   message.channel && message.channel[0] === 'D';
 const isFromMe = message => message.user === botUser.id;
@@ -75,7 +76,7 @@ bot.on('start', () => {
  * Message handler.
  */
 bot.on('message', message => {
-  if (isChatMessage(message) && !isFromMe(message)) {
+  if (isChatMessage(message) && !isBotMessage(message) && !isFromMe(message)) {
     if (isDirectMessage(message)) {
       debug('I got a direct message:', message);
       processMessage(message.text, message.channel);
