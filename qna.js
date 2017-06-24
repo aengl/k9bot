@@ -52,8 +52,12 @@ function deleteKnowledgeBase(kbId) {
       .delete({
         url: url + `knowledgebases/${kbId}`,
         headers,
+        timeout: 5000,
       })
-      .catch(debug);
+      .catch(res => {
+        debug(res);
+        resolve();
+      });
   });
 }
 

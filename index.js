@@ -67,6 +67,7 @@ async function processMessage(messageText, channel) {
     await qna.addAnswer(kbId, qnaPair[0], qnaPair[1], channel);
     bot.postMessage(channel, 'Got it! :dog:', messageOptions);
   } else if (messageText === 'update') {
+    debug('updating');
     bot.postMessage(
       channel,
       'Brb, reading up on the latest questions! :books:',
@@ -87,7 +88,6 @@ async function processMessage(messageText, channel) {
  * @param {string} channel A Slack channel ID.
  */
 function postAnswer(data, channel) {
-  debug('posting answer:', data);
   bot.postMessage(
     channel,
     data.score > 0 ? he.decode(data.answer) : 'Woof? :dog:',
