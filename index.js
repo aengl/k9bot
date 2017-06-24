@@ -5,6 +5,7 @@ const net = require('net');
 const he = require('he');
 const SlackBot = require('slackbots');
 const qna = require('./qna');
+const sheets = require('./sheets');
 
 const botName = 'k9';
 const bot = new SlackBot({
@@ -18,6 +19,20 @@ const messageOptions = {
 };
 
 /**
+ * Extracts a question & answer pair from a message.
+ * @param {string} messageText Message text.
+ * @returns An array of form [question, answer].
+ */
+function getQnAPair(messageText) {
+  const answerIndex = messageText.indexOf('A:');
+  if (answerIndex > 0 && messageText.indexOf('Q:') === 0) {
+    const question = messageText.substring(2, answerIndex).trim();
+    const answer = messageText.substring(answerIndex + 2).trim();
+    return [question, answer];
+  }
+}
+
+/**
  * Given a message on Slack, executes the appropriate response.
  *
  * @param {string} messageText Message that was sent to the bot, without
@@ -25,12 +40,14 @@ const messageOptions = {
  * @param {string} channel The channel to respond to.
  */
 function processMessage(messageText, channel) {
-  const answerIndex = messageText.indexOf('A:');
-  if (answerIndex > 0 && messageText.indexOf('Q:') === 0) {
-    const question = messageText.substring(2, answerIndex).trim();
-    const answer = messageText.substring(answerIndex + 2).trim();
+  const qnaPair = getQnAPair(messageText);
+  if (qnaPair) {
     qna
-      .addAnswer(question, answer, channel)
+      .addAnswer(qnaPair[0], qnaPair[1], channel)
+      .then(() => bot.postMessage(channel, 'Got it! :dog:', messageOptions));
+  } else if (messageText === 'update') {
+    qna
+      .publish()
       .then(() => bot.postMessage(channel, 'Got it! :dog:', messageOptions));
   } else {
     qna.getAnswer(messageText).then(data => postAnswer(data, channel));
@@ -70,6 +87,9 @@ bot.on('start', () => {
   botUser = bot.users.find(user => user.name === botName);
   debug('found myself on Slack:', botUser.id);
   console.log(`Bot "${botName}" is listening for messages..`);
+
+  // Debug: connect to Google Sheets
+  sheets.read();
 });
 
 /**

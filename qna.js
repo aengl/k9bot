@@ -1,7 +1,12 @@
+/**
+ * Interacts with Microsoft's QnA maker service.
+ */
+
 const debug = require('debug')('qna');
 const request = require('request-promise-native');
 
-const url = `https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/${process.env.KNOWLEDGEBASE_ID}/`;
+const url = `https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/${process
+  .env.KNOWLEDGEBASE_ID}/`;
 
 const headers = {
   'Ocp-Apim-Subscription-Key': process.env.QNA_KEY,
