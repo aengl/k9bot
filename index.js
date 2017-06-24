@@ -48,6 +48,7 @@ async function createKnowledgeBaseFromSheets() {
   });
   if (kbId) {
     await qna.deleteKnowledgeBase(kbId);
+    storage.removeItemSync('kbId');
   }
   kbId = await qna.createKnowledgeBase('k9bot', qnaPairs);
   storage.setItemSync('kbId', kbId);
