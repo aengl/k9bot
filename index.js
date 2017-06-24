@@ -4,6 +4,7 @@ const debug = require('debug')('index');
 const net = require('net');
 const he = require('he');
 const SlackBot = require('slackbots');
+const storage = require('node-persist');
 const qna = require('./qna');
 const sheets = require('./sheets');
 
@@ -13,6 +14,7 @@ const bot = new SlackBot({
   name: botName,
 });
 let botUser = null;
+let kbId = null;
 
 const messageOptions = {
   as_user: true,
@@ -20,6 +22,7 @@ const messageOptions = {
 
 /**
  * Extracts a question & answer pair from a message.
+ *
  * @param {string} messageText Message text.
  * @returns An array of form [question, answer].
  */
@@ -33,24 +36,47 @@ function getQnAPair(messageText) {
 }
 
 /**
+ * Creates a new knowledge base from Google Sheets.
+ */
+async function createKnowledgeBaseFromSheets() {
+  const sheet = await sheets.read();
+  const qnaPairs = sheet.values.map(row => {
+    return {
+      question: row[0],
+      answer: row[1],
+    };
+  });
+  if (kbId) {
+    await qna.deleteKnowledgeBase(kbId);
+  }
+  kbId = await qna.createKnowledgeBase('k9bot', qnaPairs);
+  storage.setItemSync('kbId', kbId);
+  await qna.publish(kbId);
+}
+
+/**
  * Given a message on Slack, executes the appropriate response.
  *
  * @param {string} messageText Message that was sent to the bot, without
  *  the mentions (@botname).
  * @param {string} channel The channel to respond to.
  */
-function processMessage(messageText, channel) {
+async function processMessage(messageText, channel) {
   const qnaPair = getQnAPair(messageText);
   if (qnaPair) {
-    qna
-      .addAnswer(qnaPair[0], qnaPair[1], channel)
-      .then(() => bot.postMessage(channel, 'Got it! :dog:', messageOptions));
+    await qna.addAnswer(kbId, qnaPair[0], qnaPair[1], channel);
+    bot.postMessage(channel, 'Got it! :dog:', messageOptions);
   } else if (messageText === 'update') {
-    qna
-      .publish()
-      .then(() => bot.postMessage(channel, 'Got it! :dog:', messageOptions));
+    bot.postMessage(
+      channel,
+      'Brb, reading up on the latest questions! :books:',
+      messageOptions
+    );
+    await createKnowledgeBaseFromSheets();
+    bot.postMessage(channel, 'Back! :dog:', messageOptions);
   } else {
-    qna.getAnswer(messageText).then(data => postAnswer(data, channel));
+    const data = await qna.getAnswer(kbId, messageText);
+    postAnswer(data, channel);
   }
 }
 
@@ -83,19 +109,22 @@ const getTextWithoutMention = message =>
 /**
  * Initialisation.
  */
-bot.on('start', () => {
+bot.on('start', async () => {
   botUser = bot.users.find(user => user.name === botName);
   debug('found myself on Slack:', botUser.id);
+  await storage.init();
+  kbId = storage.getItemSync('kbId');
+  await createKnowledgeBaseFromSheets();
   console.log(`Bot "${botName}" is listening for messages..`);
-
-  // Debug: connect to Google Sheets
-  sheets.read();
 });
 
 /**
  * Message handler.
  */
 bot.on('message', message => {
+  if (!kbId) {
+    return;
+  }
   if (isChatMessage(message) && !isBotMessage(message) && !isFromMe(message)) {
     if (isDirectMessage(message)) {
       debug('I got a direct message:', message);

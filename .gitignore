@@ -32,3 +32,6 @@ node_modules/
 # secrets
 .env
 .googlekeys.json
+
+# persist
+.node-persist

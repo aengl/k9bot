@@ -43,13 +43,12 @@ async function read() {
       {
         auth,
         spreadsheetId: process.env.SHEETS_KEY,
-        range: 'A1:B6',
+        range: 'Sheet1!A2:B1000',
       },
       (error, result) => {
         if (error) {
           reject(error);
         } else {
-          debug(result);
           resolve(result);
         }
       }
