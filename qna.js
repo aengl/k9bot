@@ -47,17 +47,12 @@ function createKnowledgeBase(name, qnapairs) {
  */
 function deleteKnowledgeBase(kbId) {
   debug('deleting knowledge base:', kbId);
-  return new Promise((resolve, reject) => {
-    request
-      .delete({
-        url: url + `knowledgebases/${kbId}`,
-        headers,
-        timeout: 5000,
-      })
-      .catch(res => {
-        debug(res);
-        resolve();
-      });
+  return new Promise(resolve => {
+    request.delete({
+      url: url + `knowledgebases/${kbId}`,
+      headers,
+    });
+    resolve();
   });
 }
 
