@@ -8,13 +8,22 @@
   "dependencies": {
     "debug": "^2.6.6",
     "dotenv": "^4.0.0",
+    "googleapis": "^19.0.0",
     "he": "^1.1.1",
-    "pm2": "^2.4.6",
+    "node-persist": "^2.0.11",
     "request-promise-native": "^1.0.4",
     "slackbots": "^1.0.2"
   },
   "scripts": {
-    "start": "pm2 start --attach index.js",
-    "dev": "env DEBUG='*' pm2 start --attach index.js --watch"
+    "start": "node index.js",
+    "dev": "env DEBUG='*' pm2 start --attach index.js --watch",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.5.2",
+    "webpack": "^3.0.0"
   }
 }

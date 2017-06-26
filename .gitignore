@@ -29,8 +29,14 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# secrets
 .env
 
 # the private keys file for Google
 .googlekeys.json
+
+# persist
+.node-persist
+
+# webpack
+bundle.js
