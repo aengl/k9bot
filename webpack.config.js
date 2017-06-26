@@ -4,7 +4,15 @@ module.exports = {
     filename: 'bundle.js',
   },
   target: 'node',
-  externals: { googleapis: 'require("googleapis")' },
+  externals: [
+    function(context, request, cb) {
+      if (/^[a-z\-0-9]+$/.test(request)) {
+        cb(null, 'commonjs ' + request);
+        return;
+      }
+      cb();
+    },
+  ],
   module: {
     rules: [
       {
