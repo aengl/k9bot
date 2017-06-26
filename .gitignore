@@ -31,6 +31,8 @@ node_modules/
 
 # secrets
 .env
+
+# the private keys file for Google
 .googlekeys.json
 
 # persist
