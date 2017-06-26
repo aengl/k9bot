@@ -1,4 +1,5 @@
 # k9bot
+
 K9 is a qna Slack chatbot based on the Microsoft QnA Maker Framework from Microsoft. Given a database of questions and answers, the bot will apply the QnA Maker natural language processing to determine the best answer given a certain question.
 
 Have you gotten the question `What's our WiFi password?` one too many times? Well, time to take matters into your own hands and let k9 answer it for you.
@@ -70,14 +71,18 @@ I expect by now you already have npm and yarn installed too ;)
 
 Well, that's awesome. Now you:
 
-1. `yarn`
-2. `yarn run start`
+    yarn
+    yarn run start
 
-It's going to use `pm2` to run it as a background process. You might need to install that and then use it to remove running processes.
+It's recommended to use `pm2` for daemonizing the process, though:
 
-1. Install pm2
-2. `pm2 list`
-3. `pm2 delete 0`
+    npm i -g pm2
+    pm2 start --attach index.js
+
+If you find yourself on an old, dusty Rasberry Pi with an ancient node version you can run the code through babel first:
+
+    yarn build
+    pm2 start --attach bundle.js
 
 ## Background
 
