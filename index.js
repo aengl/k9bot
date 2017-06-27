@@ -9,7 +9,6 @@ const qna = require('./qna');
 const sheets = require('./sheets');
 
 const bot = slack.rtm.client();
-const botName = 'k9';
 
 let botUser = null;
 let kbId = null;
@@ -50,7 +49,6 @@ async function createKnowledgeBaseFromSheets() {
   }
   kbId = await qna.createKnowledgeBase('k9bot', qnaPairs);
   storage.setItemSync('kbId', kbId);
-  await qna.publish(kbId);
 }
 
 /**
@@ -113,7 +111,7 @@ bot.started(async payload => {
   await storage.init();
   kbId = storage.getItemSync('kbId');
   await createKnowledgeBaseFromSheets();
-  console.log(`Bot "${botName}" is listening for messages..`);
+  debug(`listening for messages..`);
 });
 
 /**
