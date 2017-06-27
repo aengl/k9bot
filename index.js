@@ -13,15 +13,11 @@ const bot = slack.rtm.client();
 let botUser = null;
 let kbId = null;
 
-const messageOptions = {
-  as_user: true,
-};
-
 /**
  * Extracts a question & answer pair from a message.
  *
  * @param {string} messageText Message text.
- * @returns An array of form [question, answer].
+ * @returns {array} An array of form [question, answer].
  */
 function getQnAPair(messageText) {
   const answerIndex = messageText.indexOf('A:');
@@ -52,6 +48,27 @@ async function createKnowledgeBaseFromSheets() {
 }
 
 /**
+ * Makes the bot send a message to a Slack channel.
+ *
+ * @param {string} channel Channel to post the message in.
+ * @param {string} text The message text.
+ * @returns {Promise} A promise of a response object.
+ */
+function say(channel, text) {
+  return new Promise(resolve =>
+    slack.chat.postMessage(
+      {
+        token: process.env.BOT_TOKEN,
+        channel,
+        text,
+        as_user: true,
+      },
+      resolve
+    )
+  );
+}
+
+/**
  * Given a message on Slack, executes the appropriate response.
  *
  * @param {string} messageText Message that was sent to the bot, without
@@ -62,16 +79,12 @@ async function processMessage(messageText, channel) {
   const qnaPair = getQnAPair(messageText);
   if (qnaPair) {
     await qna.addAnswer(kbId, qnaPair[0], qnaPair[1], channel);
-    bot.postMessage(channel, 'Got it! :dog:', messageOptions);
+    bot.postMessage(channel, 'Got it! :dog:');
   } else if (messageText === 'update') {
     debug('updating');
-    bot.postMessage(
-      channel,
-      'Brb, reading up on the latest questions! :books:',
-      messageOptions
-    );
+    say(channel, 'Brb, reading up on the latest questions! :books:');
     await createKnowledgeBaseFromSheets();
-    bot.postMessage(channel, 'Back! :dog:', messageOptions);
+    say(channel, 'Back! :dog:');
   } else {
     const data = await qna.getAnswer(kbId, messageText);
     postAnswer(data, channel);
@@ -85,11 +98,7 @@ async function processMessage(messageText, channel) {
  * @param {string} channel A Slack channel ID.
  */
 function postAnswer(data, channel) {
-  bot.postMessage(
-    channel,
-    data.score > 0 ? he.decode(data.answer) : 'Woof? :dog:',
-    messageOptions
-  );
+  say(channel, data.score > 0 ? he.decode(data.answer) : 'Woof? :dog:');
 }
 
 const isChatMessage = message =>

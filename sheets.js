@@ -20,6 +20,11 @@ const jwt = new google.auth.JWT(
   'https://www.googleapis.com/auth/spreadsheets.readonly'
 );
 
+/**
+ * Authenticates with Google.
+ *
+ * @returns {Promise} A promise.
+ */
 function authenticate() {
   debug('authenticating');
   return new Promise((resolve, reject) => {
@@ -36,6 +41,12 @@ function authenticate() {
   });
 }
 
+/**
+ * Reads the first two columns of a specific sheet on Google Sheets, as
+ * determined by SHEETS_KEY.
+ *
+ * @returns {Promise} Promise of Google Sheet data.
+ */
 async function read() {
   const auth = await authenticate();
   return new Promise((resolve, reject) =>
