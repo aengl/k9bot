@@ -3,16 +3,14 @@ require('dotenv').config();
 const debug = require('debug')('index');
 const net = require('net');
 const he = require('he');
-const SlackBot = require('slackbots');
+const slack = require('slack');
 const storage = require('node-persist');
 const qna = require('./qna');
 const sheets = require('./sheets');
 
+const bot = slack.rtm.client();
 const botName = 'k9';
-const bot = new SlackBot({
-  token: process.env.BOT_TOKEN,
-  name: botName,
-});
+
 let botUser = null;
 let kbId = null;
 
@@ -101,18 +99,17 @@ const isChatMessage = message =>
 const isBotMessage = message => message.subtype === 'bot_message';
 const isDirectMessage = message =>
   message.channel && message.channel[0] === 'D';
-const isFromMe = message => message.user === botUser.id;
+const isFromMe = message => message.user === botUser;
 const mentionsMe = message =>
-  message.text && message.text.indexOf(`<@${botUser.id}>`) >= 0;
+  message.text && message.text.indexOf(`<@${botUser}>`) >= 0;
 const getTextWithoutMention = message =>
   message.text && message.text.replace(/<.+>/gi, '').trim();
 
 /**
  * Initialisation.
  */
-bot.on('start', async () => {
-  botUser = bot.users.find(user => user.name === botName);
-  debug('found myself on Slack:', botUser.id);
+bot.started(async payload => {
+  botUser = payload.self.id;
   await storage.init();
   kbId = storage.getItemSync('kbId');
   await createKnowledgeBaseFromSheets();
@@ -122,7 +119,7 @@ bot.on('start', async () => {
 /**
  * Message handler.
  */
-bot.on('message', message => {
+bot.message(message => {
   if (!kbId) {
     return;
   }
@@ -137,12 +134,4 @@ bot.on('message', message => {
   }
 });
 
-/**
- * Error handler.
- */
-const reconnect = (...args) => {
-  debug('lost connection', ...args);
-  setTimeout(() => bot.connect(), 1000);
-};
-bot.on('close', reconnect);
-bot.on('error', reconnect);
+bot.listen({ token: process.env.BOT_TOKEN });
