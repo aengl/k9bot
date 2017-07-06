@@ -8,7 +8,7 @@ const storage = require('node-persist');
 const qna = require('./qna');
 const sheets = require('./sheets');
 
-const bot = slack.rtm.client();
+let bot = slack.rtm.client();
 
 let botUser = null;
 let kbId = null;
@@ -69,6 +69,23 @@ function say(channel, text) {
 }
 
 /**
+ * The bot sends a dummy message to Slack to figure out if the connection is
+ * still alive
+ */
+function keepAlive() {
+  debug('NA NA NA NA STAYING ALIVE! Staying alive!');
+  slack.api.test({ keepAlive: 'will do' }, (err, data) => {
+    if (err) {
+      debug('Oh no! Connection lost. Restarting!');
+      debug(err);
+      bot = slack.rtm.client();
+    }
+  });
+  // Check connection in 30 min
+  setTimeout(keepAlive, 1000 * 60 * 30);
+}
+
+/**
  * Given a message on Slack, executes the appropriate response.
  *
  * @param {string} messageText Message that was sent to the bot, without
@@ -121,6 +138,7 @@ bot.started(async payload => {
   kbId = storage.getItemSync('kbId');
   await createKnowledgeBaseFromSheets();
   debug(`listening for messages..`);
+  keepAlive();
 });
 
 /**
