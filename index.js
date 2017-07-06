@@ -74,14 +74,15 @@ function say(channel, text) {
  */
 function keepAlive() {
   debug('NA NA NA NA STAYING ALIVE! Staying alive!');
-  slack.api.test({ keepAlive: 'will do', error: 'OH NO!' }, (err, data) => {
+  slack.api.test({ keepAlive: 'will do' }, (err, data) => {
     if (err) {
       debug('Oh no! Connection lost. Restarting!');
       debug(err);
       createKnowledgeBaseFromSheets();
     }
   });
-  setTimeout(keepAlive, 5000);
+  // Check connection in 30 min
+  setTimeout(keepAlive, 1000 * 60 * 30);
 }
 
 /**
