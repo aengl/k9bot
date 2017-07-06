@@ -8,7 +8,7 @@ const storage = require('node-persist');
 const qna = require('./qna');
 const sheets = require('./sheets');
 
-const bot = slack.rtm.client();
+let bot = slack.rtm.client();
 
 let botUser = null;
 let kbId = null;
@@ -78,7 +78,7 @@ function keepAlive() {
     if (err) {
       debug('Oh no! Connection lost. Restarting!');
       debug(err);
-      createKnowledgeBaseFromSheets();
+      bot = slack.rtm.client();
     }
   });
   // Check connection in 30 min
