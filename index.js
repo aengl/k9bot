@@ -69,6 +69,22 @@ function say(channel, text) {
 }
 
 /**
+ * The bot sends a dummy message to Slack to figure out if the connection is
+ * still alive
+ */
+function keepAlive() {
+  debug('NA NA NA NA STAYING ALIVE! Staying alive!');
+  slack.api.test({ keepAlive: 'will do', error: 'OH NO!' }, (err, data) => {
+    if (err) {
+      debug('Oh no! Connection lost. Restarting!');
+      debug(err);
+      createKnowledgeBaseFromSheets();
+    }
+  });
+  setTimeout(keepAlive, 5000);
+}
+
+/**
  * Given a message on Slack, executes the appropriate response.
  *
  * @param {string} messageText Message that was sent to the bot, without
@@ -121,6 +137,7 @@ bot.started(async payload => {
   kbId = storage.getItemSync('kbId');
   await createKnowledgeBaseFromSheets();
   debug(`listening for messages..`);
+  keepAlive();
 });
 
 /**
