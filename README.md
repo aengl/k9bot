@@ -20,14 +20,26 @@ https://azure.microsoft.com/en-us/services/cognitive-services/qna-maker/
 
 I don't know about you, but our guys do not want to go to the QnA Maker to maintain our QnA Database. Instead the bot gets its data from a Google Sheet containing questions on column A and answers on column B. In order for the bot to get access to this, you will need to give it access to the sheet.
 
-1. Go to https://developers.google.com/sheets/
-2. Make an account with them
-3. Set up a project
-4. Give it access to the Google Sheets API
-5. Create a service account
-6. Generate a key
+Ok, are you ready for this? This is going to be a bumpy ride!
 
-If you find this information vague, give us a hand in making it more detailed ;).
+#### 1. Go to https://developers.google.com/sheets/
+#### 2. Make an account
+#### 3. Create a project
+1. Click on the down arrow next to the Google logo on the top left
+2. Click on the `Manage Resources` button on the right of the search bar
+3. Click on the `Create project` button on the top, next to `Manage resources`
+4. Select your new project (click on the down arrow next to the Google logo again)
+#### 4. Give API access to your project
+1. Select the `Dashboard` tab on the left
+2. Click `Enable API` in the header, next to `Dashboard`
+3. Select `G Suite APIs` -> `Sheets API`
+#### 5. Create Service Credentials
+1. Select the `Credentials` tab on the left
+2. Click `Create credentials` -> `Service Account Key`
+3. `Select Account` -> `New Service Account`
+4. In role, choose `Project` -> `Viewer`
+5. `Key type` -> `Json`
+6. The newly created `json` file for your credential should be automatically downloaded.
 
 ### What do I do with all of this stuff?
 
@@ -43,7 +55,7 @@ SHEETS_KEY=[your-google-sheets-key-here]
 
 ```
 
-The second file is generated for you by Google when you set up your service.
+The second file is generated for you by Google (See ### Google Sheets API 5.6)
 **.googlekeys.json**
 ```
 {
