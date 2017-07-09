@@ -22,9 +22,10 @@ I don't know about you, but our guys do not want to go to the QnA Maker to maint
 
 1. Go to https://developers.google.com/sheets/
 2. Make an account with them
-2. Set up a project
-3. Give it access to the Google Sheets API
-4. Create an access key for it
+3. Set up a project
+4. Give it access to the Google Sheets API
+5. Create a service account
+6. Generate a key
 
 If you find this information vague, give us a hand in making it more detailed ;).
 
@@ -39,9 +40,6 @@ DEBUG='*'
 BOT_TOKEN=[your-bot-token-here]
 QNA_KEY=[your-qna-key-here]
 SHEETS_KEY=[your-google-sheets-key-here]
-GOOGLE_EMAIL=[your-service-name]@[your-bot-name].iam.gserviceaccount.com
-GOOGLE_CLIENT_ID=[your-google-client-id].apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=[your-google-client-secret]
 
 ```
 
