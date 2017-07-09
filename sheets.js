@@ -2,16 +2,16 @@
  * Queries Q&A data from Google Sheets.
  */
 
-const debug = require("debug")("sheets");
-const fs = require("fs");
-const google = require("googleapis");
-const sheets = google.sheets("v4");
+const debug = require('debug')('sheets');
+const fs = require('fs');
+const google = require('googleapis');
+const sheets = google.sheets('v4');
 
 const jwt = new google.auth.JWT(
   process.env.GOOGLE_EMAIL,
-  ".googlekeys.json",
+  '.googlekeys.json',
   null,
-  "https://www.googleapis.com/auth/spreadsheets.readonly"
+  'https://www.googleapis.com/auth/spreadsheets.readonly'
 );
 
 /**
@@ -20,7 +20,7 @@ const jwt = new google.auth.JWT(
  * @returns {Promise} A promise.
  */
 function authenticate() {
-  debug("authenticating");
+  debug('authenticating');
   return new Promise((resolve, reject) => {
     jwt.authorize((error, result) => {
       if (error) {
@@ -45,7 +45,7 @@ async function read() {
       {
         auth,
         spreadsheetId: process.env.SHEETS_KEY,
-        range: "Sheet1!A2:B1000"
+        range: 'Sheet1!A2:B1000',
       },
       (error, result) => {
         if (error) {
@@ -59,5 +59,5 @@ async function read() {
 }
 
 module.exports = {
-  read
+  read,
 };
