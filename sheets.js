@@ -7,12 +7,6 @@ const fs = require('fs');
 const google = require('googleapis');
 const sheets = google.sheets('v4');
 
-const oauth2 = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  'postmessage'
-);
-
 const jwt = new google.auth.JWT(
   process.env.GOOGLE_EMAIL,
   '.googlekeys.json',
@@ -32,10 +26,7 @@ function authenticate() {
       if (error) {
         reject(error);
       } else {
-        oauth2.setCredentials({
-          access_token: result.access_token,
-        });
-        resolve(oauth2);
+        resolve(jwt);
       }
     });
   });

@@ -14,21 +14,6 @@ let botUser = null;
 let kbId = null;
 
 /**
- * Extracts a question & answer pair from a message.
- *
- * @param {string} messageText Message text.
- * @returns {array} An array of form [question, answer].
- */
-function getQnAPair(messageText) {
-  const answerIndex = messageText.indexOf('A:');
-  if (answerIndex > 0 && messageText.indexOf('Q:') === 0) {
-    const question = messageText.substring(2, answerIndex).trim();
-    const answer = messageText.substring(answerIndex + 2).trim();
-    return [question, answer];
-  }
-}
-
-/**
  * Creates a new knowledge base from Google Sheets.
  */
 async function createKnowledgeBaseFromSheets() {
@@ -93,11 +78,7 @@ function keepAlive() {
  * @param {string} channel The channel to respond to.
  */
 async function processMessage(messageText, channel) {
-  const qnaPair = getQnAPair(messageText);
-  if (qnaPair) {
-    await qna.addAnswer(kbId, qnaPair[0], qnaPair[1], channel);
-    bot.postMessage(channel, 'Got it! :dog:');
-  } else if (messageText === 'update') {
+  if (messageText === 'update') {
     debug('updating');
     say(channel, 'Brb, reading up on the latest questions! :books:');
     await createKnowledgeBaseFromSheets();
