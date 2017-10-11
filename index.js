@@ -1,16 +1,16 @@
 require('dotenv').config();
 
 const debug = require('debug')('index');
-const net = require('net');
 const he = require('he');
-const slack = require('slack');
-const storage = require('node-persist');
 const qna = require('./qna');
 const sheets = require('./sheets');
+const slack = require('slack');
+const storage = require('node-persist');
+const WebSocket = require('ws');
 
-let bot = slack.rtm.client();
+const token = process.env.BOT_TOKEN;
 
-let botUser = null;
+let botUserId = null;
 let kbId = null;
 
 /**
@@ -43,7 +43,7 @@ function say(channel, text) {
   return new Promise(resolve =>
     slack.chat.postMessage(
       {
-        token: process.env.BOT_TOKEN,
+        token,
         channel,
         text,
         as_user: true,
@@ -51,23 +51,6 @@ function say(channel, text) {
       resolve
     )
   );
-}
-
-/**
- * The bot sends a dummy message to Slack to figure out if the connection is
- * still alive
- */
-function keepAlive() {
-  debug('NA NA NA NA STAYING ALIVE! Staying alive!');
-  slack.api.test({ keepAlive: 'will do' }, (err, data) => {
-    if (err) {
-      debug('Oh no! Connection lost. Restarting!');
-      debug(err);
-      bot = slack.rtm.client();
-    }
-  });
-  // Check connection in 30 min
-  setTimeout(keepAlive, 1000 * 60 * 30);
 }
 
 /**
@@ -100,32 +83,20 @@ function postAnswer(data, channel) {
 }
 
 const isChatMessage = message =>
-  message.type === 'message' && Boolean(message.text);
+  message.type === 'message' && message.text && message.text.length;
 const isBotMessage = message => message.subtype === 'bot_message';
 const isDirectMessage = message =>
   message.channel && message.channel[0] === 'D';
-const isFromMe = message => message.user === botUser;
+const isFromMe = message => message.user === botUserId;
 const mentionsMe = message =>
-  message.text && message.text.indexOf(`<@${botUser}>`) >= 0;
+  message.text && message.text.indexOf(`<@${botUserId}>`) >= 0;
 const getTextWithoutMention = message =>
   message.text && message.text.replace(/<.+>/gi, '').trim();
 
 /**
- * Initialisation.
- */
-bot.started(async payload => {
-  botUser = payload.self.id;
-  await storage.init();
-  kbId = storage.getItemSync('kbId');
-  await createKnowledgeBaseFromSheets();
-  debug(`listening for messages..`);
-  keepAlive();
-});
-
-/**
  * Message handler.
  */
-bot.message(message => {
+function onMessage(message) {
   if (!kbId) {
     return;
   }
@@ -138,6 +109,31 @@ bot.message(message => {
       processMessage(getTextWithoutMention(message), message.channel);
     }
   }
-});
+}
 
-bot.listen({ token: process.env.BOT_TOKEN });
+/**
+ * Connects to Slack's RTM interface.
+ * @param {string} url WebSocket address to connect to
+ */
+function connect(url) {
+  debug('opening websocket connection to', url);
+  const ws = new WebSocket(url, {});
+  ws.on('open', () => debug('websocket connection established'));
+  ws.on('message', s => onMessage(JSON.parse(s)));
+  ws.on('close', () => debug('websocket connection lost'));
+}
+
+/**
+ * Initialisation.
+ */
+slack.rtm.connect({ token }).then(async data => {
+  botUserId = data.self.id;
+  await storage.init();
+  kbId = storage.getItemSync('kbId');
+  if (!kbId) {
+    await createKnowledgeBaseFromSheets();
+  } else {
+    debug('restored knowledge base', kbId);
+  }
+  connect(data.url);
+});
