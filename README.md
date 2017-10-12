@@ -89,11 +89,6 @@ It's recommended to use `pm2` for daemonizing the process, though:
     npm i -g pm2
     pm2 start --attach index.js
 
-If you find yourself on an old, dusty Rasberry Pi with an ancient node version you can run the code through babel first:
-
-    yarn build
-    pm2 start --attach bundle.js
-
 ## Background
 
 Who needs a QnA bot you ask? Co-living communities do. If you're curious who we are, check out this website https://www.techfarm.life/
