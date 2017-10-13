@@ -1,10 +1,16 @@
 # k9bot
 
-K9 is a qna Slack chatbot based on the Microsoft QnA Maker Framework from Microsoft. Given a database of questions and answers, the bot will apply the QnA Maker natural language processing to determine the best answer given a certain question.
+`k9bot` is a QnA Slack chat bot based on the Microsoft QnA Maker Framework from Microsoft. Given a database of questions and answers, the bot will apply the QnA Maker natural language processing to determine the best answer given a certain question.
 
-Have you gotten the question `What's our WiFi password?` one too many times? Well, time to take matters into your own hands and let k9 answer it for you.
+Have you gotten the question "what's our WiFi password?" one too many times? Well, time to take matters into your own hands and let `k9bot` answer it for you.
 
-## Sounds pretty neat. But what's this QnA Maker?
+## Background
+
+Who needs a QnA bot you ask? Co-living communities do. If you're curious who we are, check out this website https://www.techfarm.life/
+
+## Prerequisites
+
+If you happen to live at Tech Farm, it's best not to follow the steps listed here but to simply request the secrets from the repository maintainers. You know who we are!
 
 ### QnA Maker
 
@@ -14,7 +20,7 @@ https://azure.microsoft.com/en-us/services/cognitive-services/qna-maker/
 1. Make a Microsoft account
 2. Go to the QnA Maker website
 3. Get access to the API
-4. Keep an eye out for a bot token and a qna key
+4. Keep an eye out for a bot token and a QnA key
 
 ### Google Sheets API
 
@@ -45,7 +51,8 @@ Ok, are you ready for this? This is going to be a bumpy ride!
 
 After you clone this repository, you will need to create two files for the bot to get access to the two services:
 
-The first file you will need to provide with information yourself
+The first file you will need to provide with information yourself. The bot token is provided by Slack, the QnA key by QnA maker and the sheets key by Google.
+
 **.env**
 ```
 DEBUG='*'
@@ -55,7 +62,8 @@ SHEETS_KEY=[your-google-sheets-key-here]
 
 ```
 
-The second file is generated for you by Google (See ### Google Sheets API 5.6)
+The second file is generated for you by Google (See `Google Sheets API 5.6`).
+
 **.googlekeys.json**
 ```
 {
@@ -73,27 +81,22 @@ The second file is generated for you by Google (See ### Google Sheets API 5.6)
 
 ```
 
-## Ok, got everything. How do I run?
+## Installation
 
-Wow! Didn't expect that :). Good job!
+> Ok, got everything. How do I run?
 
-I expect by now you already have npm and yarn installed too ;)
+Wow! Didn't expect that 😆. Good job! 🎉
 
-Well, that's awesome. Now you:
+If you're intending to write code, run:
 
-    yarn
-    yarn run start
+    make dev
 
-It's recommended to use `pm2` for daemonizing the process, though:
+If it doesn't work you may have to adjust the command to your shell, check the `Makefile` for details.
 
-    npm i -g pm2
-    pm2 start --attach index.js
+If you just want to build a Docker container, run this instead:
 
-If you find yourself on an old, dusty Rasberry Pi with an ancient node version you can run the code through babel first:
+    make build
 
-    yarn build
-    pm2 start --attach bundle.js
+### Raspberry Pi
 
-## Background
-
-Who needs a QnA bot you ask? Co-living communities do. If you're curious who we are, check out this website https://www.techfarm.life/
+If you don't plan to run Docker on your RasPi, be aware that the version of `nodejs` that comes with Raspbian is too old. Follow this guide to install a version >=8: https://github.com/nodesource/distributions#installation-instructions
