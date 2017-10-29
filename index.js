@@ -7,59 +7,58 @@ const sheets = require('./sheets');
 const Slackbot = require('./slackbot');
 const storage = require('node-persist');
 
-let kbId = null;
-const bot = new Slackbot(process.env.BOT_TOKEN);
+const bot = new Slackbot();
 
 /**
  * Creates a new knowledge base from Google Sheets.
+ * @returns {string} The new knowledge base id.
  */
-async function createKnowledgeBaseFromSheets() {
+async function createKnowledgeBaseFromSheets(oldKbId) {
   const sheet = await sheets.read();
-  const qnaPairs = sheet.values.map(row => {
-    return {
-      question: row[0],
-      answer: row[1],
-    };
-  });
-  if (kbId) {
-    await qna.deleteKnowledgeBase(kbId);
+  const qnaPairs = sheet.values.map(row => ({
+    question: row[0],
+    answer: row[1],
+  }));
+  if (oldKbId) {
+    await qna.deleteKnowledgeBase(oldKbId);
     storage.removeItemSync('kbId');
   }
-  kbId = await qna.createKnowledgeBase('k9bot', qnaPairs);
+  const kbId = await qna.createKnowledgeBase('k9bot', qnaPairs);
   storage.setItemSync('kbId', kbId);
-}
-
-/**
- * Given a message on Slack, executes the appropriate response.
- *
- * @param {string} messageText Message that was sent to the bot, without
- *  the mentions (@botname).
- * @param {string} channel The channel to respond to.
- */
-async function processMessage(messageText, channel) {
-  if (!kbId) {
-    // Ignore all message if we don't have a knowledge base yet.
-    return;
-  }
-  if (messageText === 'update') {
-    debug('updating');
-    bot.say(channel, 'Brb, reading up on the latest questions! :books:');
-    await createKnowledgeBaseFromSheets();
-    bot.say(channel, 'Back! :dog:');
-  } else {
-    const data = await qna.getAnswer(kbId, messageText);
-    postAnswer(data, channel);
-  }
+  return kbId;
 }
 
 /**
  * Posts an answer to a channel.
- *
  * @param {Object} data Data returned by `qna.getAnswer()`.
  * @param {string} channel A Slack channel ID.
  */
 function postAnswer(data, channel) {
   bot.say(channel, data.score > 0 ? he.decode(data.answer) : 'Woof? :dog:');
+}
+
+/**
+ * Given a message on Slack, executes the appropriate response.
+ * @param {string} messageText Message that was sent to the bot, without
+ *  the mentions (@botname).
+ * @param {string} channel The channel to respond to.
+ * @returns {string} The knowledge base id.
+ */
+async function processMessage(kbId, messageText, channel) {
+  if (!kbId) {
+    // Ignore all message if we don't have a knowledge base yet.
+    return kbId;
+  }
+  if (messageText === 'update') {
+    debug('updating');
+    bot.say(channel, 'Brb, reading up on the latest questions! :books:');
+    const newKbId = await createKnowledgeBaseFromSheets();
+    bot.say(channel, 'Back! :dog:');
+    return newKbId;
+  }
+  const data = await qna.getAnswer(kbId, messageText);
+  postAnswer(data, channel);
+  return kbId;
 }
 
 /**
@@ -69,12 +68,13 @@ function postAnswer(data, channel) {
  */
 bot.connect().then(async () => {
   await storage.init();
-  kbId = storage.getItemSync('kbId');
+  let kbId = storage.getItemSync('kbId');
   if (!kbId) {
-    await createKnowledgeBaseFromSheets();
+    kbId = await createKnowledgeBaseFromSheets(kbId);
   } else {
     debug('restored knowledge base', kbId);
   }
+  bot.on('chatMessage', (...args) => {
+    kbId = processMessage(kbId, ...args);
+  });
 });
-
-bot.on('chatMessage', processMessage);

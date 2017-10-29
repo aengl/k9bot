@@ -20,10 +20,10 @@ const headers = {
  */
 function createKnowledgeBase(name, qnapairs) {
   debug('creating knowledge base');
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     request
       .post({
-        url: url + `knowledgebases/create`,
+        url: `${url}knowledgebases/create`,
         headers,
         form: {
           name,
@@ -49,7 +49,7 @@ function deleteKnowledgeBase(kbId) {
   debug('deleting knowledge base:', kbId);
   return new Promise(resolve => {
     request.delete({
-      url: url + `knowledgebases/${kbId}`,
+      url: `${url}knowledgebases/${kbId}`,
       headers,
     });
     resolve();
@@ -66,10 +66,10 @@ function deleteKnowledgeBase(kbId) {
  */
 function getAnswer(kbId, question) {
   debug('got question:', question);
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     request
       .post({
-        url: url + `knowledgebases/${kbId}/generateAnswer`,
+        url: `${url}knowledgebases/${kbId}/generateAnswer`,
         headers,
         form: { question },
       })
@@ -83,35 +83,6 @@ function getAnswer(kbId, question) {
 }
 
 /**
- * Adds a QnA pair to the knowledge base.
- *
- * @param {string} kbId The knowledge base id.
- * @param {string} question The question to add.
- * @param {string} answer The answer to the question.
- * @param {string} channel The channel to post an acknowledgement to.
- * @returns {Promise} A promise.
- */
-function addAnswer(kbId, question, answer, channel) {
-  debug('adding new question/answer:', question, answer);
-  const body = JSON.stringify({
-    add: {
-      qnaPairs: [
-        {
-          answer: answer,
-          question: question,
-        },
-      ],
-    },
-  });
-  return new Promise((resolve, reject) => {
-    request
-      .patch({ url: url + `knowledgebases/${kbId}`, headers, body })
-      .then(() => publish(kbId).then(resolve))
-      .catch(debug);
-  });
-}
-
-/**
  * Publishes the knowledge base. Necessary to make any changes live.
  * @param {string} kbId The knowledge base id.
  * @returns {Promise} A promise.
@@ -119,14 +90,42 @@ function addAnswer(kbId, question, answer, channel) {
 function publish(kbId) {
   debug('publishing knowledge base');
   return request
-    .put({ url: url + `knowledgebases/${kbId}`, headers })
+    .put({ url: `${url}knowledgebases/${kbId}`, headers })
     .catch(debug);
+}
+
+/**
+ * Adds a QnA pair to the knowledge base.
+ *
+ * @param {string} kbId The knowledge base id.
+ * @param {string} question The question to add.
+ * @param {string} answer The answer to the question.
+ * @returns {Promise} A promise.
+ */
+function addAnswer(kbId, question, answer) {
+  debug('adding new question/answer:', question, answer);
+  const body = JSON.stringify({
+    add: {
+      qnaPairs: [
+        {
+          answer,
+          question,
+        },
+      ],
+    },
+  });
+  return new Promise(resolve => {
+    request
+      .patch({ url: `${url}knowledgebases/${kbId}`, headers, body })
+      .then(() => publish(kbId).then(resolve))
+      .catch(debug);
+  });
 }
 
 module.exports = {
   createKnowledgeBase,
   deleteKnowledgeBase,
   getAnswer,
-  addAnswer,
   publish,
+  addAnswer,
 };

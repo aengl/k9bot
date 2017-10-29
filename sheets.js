@@ -3,10 +3,9 @@
  */
 
 const debug = require('debug')('sheets');
-const fs = require('fs');
 const google = require('googleapis');
-const sheets = google.sheets('v4');
 
+const sheets = google.sheets('v4');
 const jwt = new google.auth.JWT(
   process.env.GOOGLE_EMAIL,
   '.googlekeys.json',
@@ -16,13 +15,12 @@ const jwt = new google.auth.JWT(
 
 /**
  * Authenticates with Google.
- *
  * @returns {Promise} A promise.
  */
 function authenticate() {
   debug('authenticating');
   return new Promise((resolve, reject) => {
-    jwt.authorize((error, result) => {
+    jwt.authorize(error => {
       if (error) {
         reject(error);
       } else {
@@ -35,7 +33,6 @@ function authenticate() {
 /**
  * Reads the first two columns of a specific sheet on Google Sheets, as
  * determined by SHEETS_KEY.
- *
  * @returns {Promise} Promise of Google Sheet data.
  */
 async function read() {

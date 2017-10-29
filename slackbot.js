@@ -3,8 +3,8 @@ const slack = require('slack');
 const WebSocket = require('ws');
 
 module.exports = class Slackbot {
-  constructor(token) {
-    this.token = token;
+  constructor() {
+    this.token = process.env.BOT_TOKEN;
     this.lastPongId = 0;
     this.lastPongReceived = null;
     this.botUserId = null;
@@ -21,10 +21,17 @@ module.exports = class Slackbot {
       message.text && message.text.replace(/<.+>/gi, '').trim();
   }
 
+  /**
+   * Registers an event handler.
+   */
   on(handler, callback) {
     this.eventHandlers[handler] = callback;
   }
 
+  /**
+   * Connects the bot to Slack.
+   * @returns {Promise} A promise.
+   */
   connect() {
     debug('connecting');
     return new Promise(resolve => {
@@ -46,9 +53,15 @@ module.exports = class Slackbot {
     this.webSocket.on('open', () => debug('websocket connection established'));
     this.webSocket.on('message', s => this.processMessage(JSON.parse(s)));
     this.webSocket.on('close', () => debug('websocket connection lost'));
-    setInterval(() => this.ping(), 5000);
+    setInterval(() => this.ping(), 60 * 1000);
   }
 
+  /**
+   * Sends a ping to Slack.
+   *
+   * If no pong is received, the the Slackbot will automatically attempt to
+   * reconnect when the next ping is scheduled to be sent.
+   */
   ping() {
     if (this.lastPongId && !this.lastPongReceived) {
       debug('did not get pong, reconnecting');
@@ -66,7 +79,7 @@ module.exports = class Slackbot {
   }
 
   /**
-   * Processes incoming websocket data.
+   * Processes incoming websocket message.
    * @param {object} message JSON data.
    */
   processMessage(message) {
@@ -77,6 +90,10 @@ module.exports = class Slackbot {
     }
   }
 
+  /**
+   * Processes incoming pong.
+   * @param {object} message JSON data.
+   */
   processPong(message) {
     debug('pong', message);
     if (message.reply_to === this.lastPongId) {
@@ -84,22 +101,25 @@ module.exports = class Slackbot {
     }
   }
 
+  /**
+   * Processes incoming chat message.
+   * @param {object} message JSON data.
+   */
   processChatMessage(message) {
-    const messageHandler = this.eventHandlers['chatMessage'] || (() => {});
+    const messageHandler = this.eventHandlers.chatMessage || (() => {});
     if (!this.isBotMessage(message) && !this.isFromMe(message)) {
       if (this.isDirectMessage(message)) {
         debug('I got a direct message:', message);
         messageHandler(message.text, message.channel);
       } else if (this.mentionsMe(message)) {
         debug('I was mentioned in this message:', message);
-        messageHandler(getTextWithoutMention(message), message.channel);
+        messageHandler(this.getTextWithoutMention(message), message.channel);
       }
     }
   }
 
   /**
    * Makes the bot send a message to a Slack channel.
-   *
    * @param {string} channel Channel to post the message in.
    * @param {string} text The message text.
    * @returns {Promise} A promise of a response object.
