@@ -6,14 +6,12 @@ const debug = require('debug')('qna');
 const request = require('request-promise-native');
 
 const url = `https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/`;
-
 const headers = {
   'Ocp-Apim-Subscription-Key': process.env.QNA_KEY,
 };
 
 /**
  * Creates a new knowledge base.
- *
  * @param {string} name Knowledge base name.
  * @param {array} qnapairs Array of question/answer objects.
  * @returns {Promise} The id of the newly created knowledge base.
@@ -41,7 +39,6 @@ function createKnowledgeBase(name, qnapairs) {
 
 /**
  * Deletes an existing knowledge base.
- *
  * @param {string} kbId The knowledge base id.
  * @returns {Promise} A promise.
  */
@@ -59,7 +56,6 @@ function deleteKnowledgeBase(kbId) {
 /**
  * Queries the knowledge base for a question and returns the answer as an
  * object.
- *
  * @param {string} kbId The knowledge base id.
  * @param {Object} question The question to query the KB with.
  * @returns {Promise} A promise of an answer object.
