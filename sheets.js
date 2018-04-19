@@ -3,7 +3,7 @@
  */
 
 const debug = require('debug')('sheets');
-const google = require('googleapis');
+const { google } = require('googleapis');
 
 const sheets = google.sheets('v4');
 const jwt = new google.auth.JWT(

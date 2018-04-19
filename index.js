@@ -7,6 +7,10 @@ const sheets = require('./sheets');
 const Slackbot = require('./slackbot');
 const storage = require('node-persist');
 
+process.on('unhandledRejection', up => {
+  throw up;
+});
+
 const bot = new Slackbot();
 
 /**
@@ -15,7 +19,7 @@ const bot = new Slackbot();
  */
 async function createKnowledgeBaseFromSheets(oldKbId) {
   const sheet = await sheets.read();
-  const qnaPairs = sheet.values.map(row => ({
+  const qnaPairs = sheet.data.values.map(row => ({
     question: row[0],
     answer: row[1],
   }));
@@ -24,7 +28,7 @@ async function createKnowledgeBaseFromSheets(oldKbId) {
     storage.removeItemSync('kbId');
   }
   const kbId = await qna.createKnowledgeBase('k9bot', qnaPairs);
-  storage.setItemSync('kbId', kbId);
+  await storage.setItem('kbId', kbId);
   return kbId;
 }
 
@@ -66,9 +70,10 @@ async function processMessage(kbId, messageText, channel) {
  *
  * Connect the Slackbot and create the knowledge base if necessary.
  */
-bot.connect().then(async () => {
+async function init() {
+  await bot.connect();
   await storage.init();
-  let kbId = storage.getItemSync('kbId');
+  let kbId = await storage.getItem('kbId');
   if (!kbId) {
     kbId = await createKnowledgeBaseFromSheets(kbId);
   } else {
@@ -77,4 +82,6 @@ bot.connect().then(async () => {
   bot.on('chatMessage', (...args) => {
     kbId = processMessage(kbId, ...args);
   });
-});
+}
+
+init();

@@ -5,4 +5,4 @@ run:
 	docker run -d k9bot
 
 dev:
-	env DEBUG=* ./node_modules/.bin/nodemon index.js
+	env ./node_modules/.bin/nodemon index.js
