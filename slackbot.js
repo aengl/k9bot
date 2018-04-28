@@ -7,6 +7,7 @@ module.exports = class Slackbot {
     this.token = process.env.BOT_TOKEN;
     this.lastPongId = 0;
     this.lastPongReceived = null;
+    this.pingInterval = null;
     this.botUserId = null;
     this.webSocket = null;
     this.eventHandlers = {};
@@ -53,7 +54,9 @@ module.exports = class Slackbot {
     this.webSocket.on('open', () => debug('websocket connection established'));
     this.webSocket.on('message', s => this.processMessage(JSON.parse(s)));
     this.webSocket.on('close', () => debug('websocket connection lost'));
-    setInterval(() => this.ping(), 60 * 1000);
+    if (!this.pingInterval) {
+      this.pingInterval = setInterval(() => this.ping(), 120 * 1000);
+    }
   }
 
   /**
