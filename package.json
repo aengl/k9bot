@@ -1,6 +1,6 @@
 {
   "name": "k9bot",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "index.js",
   "repository": "https://github.com/aengl/k9bot.git",
   "author": "Andreas Smeria <ae@cephea.de>",
@@ -14,6 +14,7 @@
     "request": "2.85.0",
     "request-promise-native": "1.0.5",
     "slack": "11.0.0",
+    "supports-color": "5.4.0",
     "ws": "5.1.1"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "nodemon": "1.17.3"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node .",
+    "start:dev": "nodemon ."
   }
 }
